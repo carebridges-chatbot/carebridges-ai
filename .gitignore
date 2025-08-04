@@ -1,0 +1,48 @@
+# Python 캐시 파일
+__pycache__/
+*.py[cod]
+*.pyo
+
+# 가상환경
+.venv/
+env/
+venv/
+
+# IDE 설정
+.vscode/
+.idea/
+
+# OS별 자동 생성 파일
+.DS_Store
+Thumbs.db
+
+# 환경 변수 파일
+.env
+.env.*
+
+# 로그 및 캐시
+*.log
+*.tmp
+*.bak
+.cache/
+.mypy_cache/
+.pytest_cache/
+.pyre/
+.pytype/
+
+# Jupyter/IPython
+.ipynb_checkpoints/
+
+#빌드/배포
+build/
+dist/
+*.egg-info/
+site/
+
+# FAISS Index 저장 파일 (예: 저장용 binary)
+*.faiss
+*.index
+
+# 문서 인덱싱 결과
+data/index/
+data/embeddings/
