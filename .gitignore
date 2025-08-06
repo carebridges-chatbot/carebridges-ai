@@ -43,6 +43,7 @@ site/
 # FAISS Index 저장 파일 (예: 저장용 binary)
 *.faiss
 *.index
+*.pkl
 
 # 문서 인덱싱 결과
 data/index/
