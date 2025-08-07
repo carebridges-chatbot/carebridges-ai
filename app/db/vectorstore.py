@@ -15,6 +15,9 @@ class VectorStoreHandler:
     def build_vectorstore(self, documents: List[Document]):
         """
         문서 리스트를 받아 벡터스토어를 생성하고 저장합니다.
+
+        [주의] 이 함수는 ingest 등 초기 벡터 구축용입니다.
+        서비스 중에는 사용하지 마세요.
         """
         print("벡터스토어 생성 중...")
         self.vectorstore = FAISS.from_documents(documents, self.embedding)
