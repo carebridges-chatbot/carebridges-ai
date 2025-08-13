@@ -1,7 +1,7 @@
 from app.services.rag import RAGPipeline
 
 rag = RAGPipeline()
-question = "장기요양등급 판정 기준은 무엇인가요?"
+question = "서비스 인정점수 하향 조정됐다는데 어떻게 바뀌었나요?"
 response = rag.generate_answer(question)
 
 print("GPT 응답:")
