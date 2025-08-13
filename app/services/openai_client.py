@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class OpenAIClient:
-    def __init__(self, api_key: str = None, model: str = "gpt-4o-mini"): # 성능 개선시 str = "gpt-4o" 로 변경하기
+    def __init__(self, api_key: str = None, model: str = "gpt-4o"): # 성능 개선시 str = "gpt-4o" 로 변경하기
         self.api_key = os.getenv("OPENAI_API_KEY")
         self.model = model
         self.client = OpenAI(api_key=self.api_key)
