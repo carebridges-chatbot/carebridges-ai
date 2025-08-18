@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Tuple
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
@@ -39,13 +39,20 @@ class VectorStoreHandler:
         else:
             raise FileNotFoundError(f"'{self.persist_path}'에 저장된 벡터스토어가 없습니다.")
 
+    # 점수 없이 문서만 (기존 호환용)
     def search(self, query: str, top_k: int = 5) -> List[Document]:
-        """
-        쿼리를 기반으로 유사한 문서를 검색합니다.
-        """
         if not self.vectorstore:
             raise RuntimeError("벡터스토어가 로드되지 않았습니다. 먼저 load_vectorstore()를 호출하세요.")
-        
-        print(f"검색 쿼리: {query}")
-        results = self.vectorstore.similarity_search(query, k=top_k)
-        return results
+        return self.vectorstore.similarity_search(query, k=top_k)
+
+    # 점수 포함 검색: [(Document, score)]
+    def search_with_scores(self, query: str, top_k: int = 5) -> List[Tuple[Document, float]]:
+        if not self.vectorstore:
+            raise RuntimeError("벡터스토어가 로드되지 않았습니다. 먼저 load_vectorstore()를 호출하세요.")
+        return self.vectorstore.similarity_search_with_score(query, k=top_k)
+
+    # 임계값(거리) 이하만 통과
+    def search_with_threshold(self, query: str, top_k: int = 5, threshold: float = 0.32) -> List[Tuple[Document, float]]:
+        pairs = self.search_with_scores(query, top_k=top_k)
+        # 주의: score는 보통 '거리' → 작을수록 유사
+        return [(doc, score) for doc, score in pairs if float(score) <= float(threshold)]
