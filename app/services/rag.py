@@ -4,11 +4,13 @@ from langchain_core.documents import Document
 from app.db.vectorstore import VectorStoreHandler
 from app.services.prompt_builder import build_prompt
 from app.services.openai_client import OpenAIClient
+from app.services.storage_utils import signed_url   #  추가: 서명 URL 유틸
 
 # ===== 설정 =====
 THRESHOLD_DISTANCE = float(os.getenv("THRESHOLD_DISTANCE", "0.32"))  # 작을수록 유사(거리)
 MIN_DOCS = int(os.getenv("MIN_DOCS", "1"))                            # 통과 문서 최소 개수
 FALLBACK_MSG = os.getenv("FALLBACK_MSG", "사회복지와 관련된 질문만 해주세요.")
+SIGNED_URL_TTL_MIN = int(os.getenv("SIGNED_URL_TTL_MIN", "10"))       # ★ 링크 유효시간(분)
 
 SMALLTALK_SET = {
     "안녕", "안녕하세요", "하이", "hi", "hello", "헬로", "테스트", "test",
@@ -70,16 +72,38 @@ class RAGPipeline:
         if len(pairs) < MIN_DOCS:
             return FALLBACK_MSG, []
 
-        # 3) 문서가 있으면 RAG 수행
+        # ===== LLM 호출 =====
         docs = [doc for doc, _ in pairs]
         messages = self.prompt_builder([d.page_content for d in docs], question)
         answer = self.llm.chat(messages)
 
-        sources = [{
-            "text": doc.page_content[:500],
-            "score": float(score),
-            "confidence": score_to_confidence(float(score)),
-            "metadata": getattr(doc, "metadata", None),
-        } for doc, score in pairs]
+        # ===== 출처 생성 (source_url 주입) =====
+        sources = []
+        for doc, score in pairs:
+            md = dict(getattr(doc, "metadata", {}) or {})
+            gs_path = md.get("gs_path")
+
+            # title 보강
+            if gs_path and not md.get("title"):
+                md["title"] = os.path.basename(gs_path)
+
+            # score / confidence 보강(원하면 프런트가 metadata에서도 사용 가능)
+            md["score"] = float(score)
+            md["confidence"] = score_to_confidence(float(score))
+
+            # ★ 서명 URL 주입: 프런트에서 곧바로 열 수 있도록
+            if gs_path:
+                try:
+                    md["source_url"] = signed_url(gs_path, minutes=SIGNED_URL_TTL_MIN, inline=True)
+                except Exception:
+                    # 실패해도 다른 필드는 유지
+                    pass
+
+            sources.append({
+                "text": doc.page_content[:500],
+                "score": float(score),
+                "confidence": md["confidence"],
+                "metadata": md,     # ← 여기 안에 source_url, title, page, gs_path 포함
+            })
 
         return answer, sources
