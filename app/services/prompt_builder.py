@@ -1,14 +1,71 @@
-from typing import List
+from typing import List, Tuple, Union, Mapping, Any
 
-def build_prompt(documents: List[str], question: str) -> List[dict]:
+def build_prompt(documents: List[Any], question: str) -> List[dict]:
     """
     사회복지사 업무용 RAG+일반지식 하이브리드 프롬프트
     - 문서 우선, 부족한 부분은 일반지식 [G]로 보완, 추정은 [I]
     - 문서 인용은 [D1], [D2]… (documents 순서)
+    - [근거 및 표시]에는 [D번호 파일명] 형식으로 문서명까지 기재
     - 웹 검색/크롤링 금지
     - [⚠️ 한계/주의] 섹션은 반드시 이모지 포함 제목으로 출력
     - 요약 규칙: 긴 설명일 때만 맨 앞에 '핵심 요약'(1~3문장) 제공
     """
+    def _extract(item: Any, idx: int) -> Tuple[str, str]:
+        """
+        documents 원소에서 (filename, text)를 뽑아내는 유틸.
+        지원 형태:
+          - (filename, text) 튜플
+          - str 텍스트
+          - dict: filename/source/id, content/text/page_content
+          - LangChain Document: .page_content, .metadata['source'/'filename']
+        """
+        # 1) 2-튜플
+        if isinstance(item, tuple) and len(item) == 2:
+            filename, text = item
+            return str(filename), str(text)
+
+        # 2) 문자열만
+        if isinstance(item, str):
+            return f"doc_{idx+1}.txt", item
+
+        # 3) dict 계열
+        if isinstance(item, Mapping):
+            m = item
+            text = (
+                m.get("content")
+                or m.get("text")
+                or m.get("page_content")
+                or ""
+            )
+            filename = (
+                m.get("filename")
+                or m.get("source")
+                or m.get("id")
+                or f"doc_{idx+1}"
+            )
+            return str(filename), str(text)
+
+        # 4) LangChain Document 같은 객체
+        #    (page_content, metadata 속성 가정)
+        if hasattr(item, "page_content"):
+            text = getattr(item, "page_content", "")
+            meta = getattr(item, "metadata", {}) or {}
+            if isinstance(meta, Mapping):
+                filename = (
+                    meta.get("filename")
+                    or meta.get("source")
+                    or f"doc_{idx+1}"
+                )
+            else:
+                filename = f"doc_{idx+1}"
+            return str(filename), str(text)
+
+        # 그 외: 문자열로 강제 변환
+        return f"doc_{idx+1}", str(item)
+
+    # 모든 문서를 (filename, text) 형태로 통일
+    normalized: List[Tuple[str, str]] = [_extract(d, i) for i, d in enumerate(documents)]
+
     system_prompt = (
         "역할: 너는 한국의 사회복지사가 현장에서 상담·사례관리·급여/서비스 안내를 할 때 "
         "정확하고 실무 친화적인 정보를 제공하는 한국어 비서다.\n\n"
@@ -27,22 +84,32 @@ def build_prompt(documents: List[str], question: str) -> List[dict]:
         "(선택) [핵심 요약] 1~3문장(긴 답변일 때만)\n"
         "[자세한 안내] 자격요건·지원내용·본인부담/소득·재산 기준·신청 장소/방법/서류·처리기간/심사·유의사항\n"
         "[다음 단계] 사회복지사가 바로 수행할 체크리스트(번호 목록)\n"
-        "[근거 및 표시] 인용 문서 [D1][D2]…, 일반지식 [G], 추정/해석 [I]\n"
+        "[근거 및 표시] 인용 문서 [D1 파일명][D2 파일명]…, 일반지식 [G], 추정/해석 [I]\n"
         "[⚠️ 한계/주의] 정보 공백·불확실 지점과 최신성 경고 (여러 개면 목록)."
     )
 
     context_header = (
-        "다음은 참고 문서들이다. 문서 인용 표시는 [D1]부터 시작한다. "
-        "문서가 부족하면 네 일반지식으로 보완하되 [G]로, 추정은 [I]로 표시하라."
+        "다음은 참고 문서들이다. 문서 인용 표시는 [D1], [D2]처럼 번호로 하고, "
+        "답변 마지막 [근거 및 표시] 섹션에는 [D번호 파일명] 형식으로 문서명을 '반드시' 함께 적어라."
     )
 
-    numbered_context = "\n\n".join(f"[D{i+1}] {doc}" for i, doc in enumerate(documents))
+    # 본문 컨텍스트: (파일명) + 내용
+    numbered_context = "\n\n".join(
+        f"[D{i+1}] ({filename}) {text}"
+        for i, (filename, text) in enumerate(normalized)
+    )
+
+    # 모델이 마지막에 파일명을 틀리지 않도록, 참고용 목록을 함께 전달(지시문)
+    file_list_for_footer = " ".join(
+        f"[D{i+1} {filename}]" for i, (filename, _) in enumerate(normalized)
+    )
 
     user_prompt = (
         f"{context_header}\n\n<컨텍스트>\n{numbered_context}\n</컨텍스트>\n\n"
         f"질문: {question}\n"
         "위 지침을 따르고, 문장 내에 적절히 [D#]/[G]/[I] 표식을 포함하라. "
-        "요약 규칙을 준수해 (필요한 경우에만) 맨 앞에 '[핵심 요약]'을 1~3문장으로 제시하라."
+        "요약 규칙을 준수해 (필요한 경우에만) 맨 앞에 '[핵심 요약]'을 1~3문장으로 제시하라.\n\n"
+        f"참고: [근거 및 표시] 섹션에는 다음 형식으로 정확히 기재하라 → {file_list_for_footer} [G] [I]"
     )
 
     return [
