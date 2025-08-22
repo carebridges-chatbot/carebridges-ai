@@ -7,7 +7,7 @@ vectorstore = VectorStoreHandler()
 vectorstore.load_vectorstore()
 
 # 2. 사용자 질문
-question = "장기요양등급 판정 기준은 무엇인가요?"
+question = "장기요양등급 판정 기준은 무엇인가?"
 
 # 3. 관련 문서 검색 (예: 상위 5개)
 retrieved_docs = vectorstore.search(query=question, top_k=5)
