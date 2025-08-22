@@ -1,0 +1,44 @@
+name: Deploy Flask to EC2 using CodeDeploy
+
+# Workflow를 트리거하는 이벤트 지정
+# 이 코드는 main 브랜치에 push 할 때 Workflow 실행
+on:
+  push:
+    branches: [ "main" ]
+    
+# Workflow 내에서 사용하는 환경 변수 정의  
+env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ap-northeast-2
+      S3_BUCKET: chatbot-deploy-bucket
+      CODEDEPLOY_APP_NAME: chatbot-deploy
+      CODEDEPLOY_GROUP_NAME: chatbot-deploy-group
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Zip source files
+      run: zip -r flask-app.zip . -x '*.git*'
+
+    - name: Upload to S3
+      run: aws s3 cp flask-app.zip s3://${{ env.S3_BUCKET }}/flask-app.zip
+
+    - name: Deploy to CodeDeploy
+      run: |
+        aws deploy create-deployment \
+          --application-name ${{ env.CODEDEPLOY_APP_NAME }} \
+          --deployment-group-name ${{ env.CODEDEPLOY_GROUP_NAME }} \
+          --s3-location bucket=${{ env.S3_BUCKET }},bundleType=zip,key=flask-app.zip
