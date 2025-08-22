@@ -1,20 +1,33 @@
 # app/services/test_storage_smoke.py
 import os
 from datetime import timedelta
-from dotenv import load_dotenv
-from google.cloud import storage
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+# 클라이언트 팩토리 재사용(환경변수 JSON/B64/파일 모두 지원)
+from app.services.storage_utils import _make_client
+
+load_dotenv(find_dotenv())
 
 bucket_name = os.getenv("FIREBASE_BUCKET")
-cred = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 prefix = (os.getenv("FIREBASE_PDF_PREFIX", "") or "").replace("\\", "/")
 
-assert bucket_name and not bucket_name.startswith("gs://")
-assert cred and os.path.exists(cred), f"키 파일 경로 확인: {cred}"
+assert bucket_name and not bucket_name.startswith("gs://"), \
+    "FIREBASE_BUCKET에는 'gs://'를 빼고 버킷 이름만 넣으세요."
 
-client = storage.Client()
-pdfs = [b for b in client.list_blobs(bucket_name, prefix=prefix) if b.name.lower().endswith(".pdf")]
+# 어떤 인증이 쓰였는지 힌트 출력(디버그)
+if os.getenv("FIREBASE_SA_JSON"):
+    print("[auth] using FIREBASE_SA_JSON")
+elif os.getenv("FIREBASE_SA_B64"):
+    print("[auth] using FIREBASE_SA_B64")
+elif os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+    print(f"[auth] using GOOGLE_APPLICATION_CREDENTIALS={os.getenv('GOOGLE_APPLICATION_CREDENTIALS')}")
+else:
+    print("[auth] using default credentials (ADC)")
+
+client = _make_client()
+
+pdfs = [b for b in client.list_blobs(bucket_name, prefix=prefix)
+        if b.name.lower().endswith(".pdf")]
 
 print("Bucket:", bucket_name)
 print("Prefix:", repr(prefix))
@@ -29,4 +42,4 @@ if pdfs:
     )
     print("signed url sample:", url)
 else:
-    print("루트에 .pdf가 없습니다. 콘솔 파일명(정확한 철자) 확인하세요.")
+    print("해당 prefix 아래에 .pdf가 없습니다.")
