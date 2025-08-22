@@ -12,8 +12,8 @@ env:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ap-northeast-2
       S3_BUCKET: chatbot-deploy-bucket
-      CODEDEPLOY_APP_NAME: chatbot-deploy
-      CODEDEPLOY_GROUP_NAME: chatbot-deploy-group
+      CODEDEPLOY_APP_NAME: carebridges-rag
+      CODEDEPLOY_GROUP_NAME: carebridges-rag-deploy
 
 jobs:
   deploy:
