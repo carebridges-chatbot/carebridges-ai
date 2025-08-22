@@ -52,7 +52,19 @@ class VectorStoreHandler:
         return self.vectorstore.similarity_search_with_score(query, k=top_k)
 
     # 임계값(거리) 이하만 통과
-    def search_with_threshold(self, query: str, top_k: int = 5, threshold: float = 0.32) -> List[Tuple[Document, float]]:
+    def search_with_threshold(self, query: str, top_k: int = 5, threshold: float = 0.32):
         pairs = self.search_with_scores(query, top_k=top_k)
-        # 주의: score는 보통 '거리' → 작을수록 유사
-        return [(doc, score) for doc, score in pairs if float(score) <= float(threshold)]
+        kept = []
+        for doc, score in pairs:
+            # score 메타데이터 보강(선택)
+            md = dict(getattr(doc, "metadata", {}) or {})
+            md.setdefault("score", float(score))
+            # title 자동 보강(선택)
+            gs_path = md.get("gs_path")
+            if gs_path and not md.get("title"):
+                md["title"] = os.path.basename(gs_path)
+            doc.metadata = md
+
+            if float(score) <= float(threshold):
+                kept.append((doc, float(score)))
+        return kept
