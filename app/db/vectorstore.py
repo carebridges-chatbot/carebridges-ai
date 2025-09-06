@@ -1,13 +1,12 @@
+# db/vectorstore.py
 import os
 from typing import List, Tuple
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
-load_dotenv()
 
-DEFAULT_EMBED_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
-DEFAULT_BATCH = int(os.getenv("EMBED_BATCH", "64"))
+load_dotenv()
 
 class VectorStoreHandler:
     def __init__(self, persist_path: str = "db/faiss_index"):
@@ -15,35 +14,13 @@ class VectorStoreHandler:
         self.embedding = OpenAIEmbeddings()
         self.vectorstore = None
 
-    def build_vectorstore(self, documents: List[Document], batch_size: int = DEFAULT_BATCH):
+    def build_vectorstore(self, documents: List[Document]):
         """
-        문서 리스트를 받아 벡터스토어를 '배치'로 생성/저장 (토큰 30만 제한 회피 + 빠른 진행)
-        ingest 등 초기 벡터 구축용. 서비스 중에는 사용하지 마세요.
+        문서 리스트를 받아 벡터스토어를 생성하고 저장합니다.
+        [주의] 이 함수는 ingest 등 초기 벡터 구축용입니다. 서비스 중에는 사용하지 마세요.
         """
-        docs = [d for d in documents if (d.page_content or "").strip()]
-        total = len(docs)
-        if total == 0:
-            raise ValueError("인덱싱할 문서가 없습니다.")
-
-        print(f"벡터스토어 생성(배치={batch_size}, 총 {total} 청크)...")
-
-        store = None
-        done = 0
-        for i in range(0, total, batch_size):
-            batch = docs[i:i + batch_size]
-            if store is None:
-                store = FAISS.from_documents(batch, self.embedding)
-            else:
-                store.add_documents(batch)
-
-            done += len(batch)
-            print(f"  - 진행: {done}/{total}")
-
-            # 긴 작업 중간중간 저장(크래시 대비)
-            if (i // batch_size) % 5 == 4:
-                store.save_local(self.persist_path)
-
-        self.vectorstore = store
+        print("벡터스토어 생성 중...")
+        self.vectorstore = FAISS.from_documents(documents, self.embedding)
         self.vectorstore.save_local(self.persist_path)
         print("벡터스토어 저장 완료!")
 
