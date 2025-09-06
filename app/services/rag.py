@@ -1,3 +1,4 @@
+# services/rag.py
 import os
 from typing import List, Tuple, Dict, Any
 from langchain_core.documents import Document
@@ -11,6 +12,10 @@ THRESHOLD_DISTANCE = float(os.getenv("THRESHOLD_DISTANCE", "0.32"))  # 작을수
 MIN_DOCS = int(os.getenv("MIN_DOCS", "1"))                            # 통과 문서 최소 개수
 FALLBACK_MSG = os.getenv("FALLBACK_MSG", "사회복지와 관련된 질문만 해주세요.")
 SIGNED_URL_TTL_MIN = int(os.getenv("SIGNED_URL_TTL_MIN", "10"))       # ★ 링크 유효시간(분)
+
+# LLM 프롬프트 안전 가드(문자 기준; 필요 시 토큰 기준으로 교체 가능)
+MAX_DOC_CHARS_FOR_LLM = int(os.getenv("MAX_DOC_CHARS_FOR_LLM", "1800"))
+MAX_CONTEXT_CHARS_BUDGET = int(os.getenv("MAX_CONTEXT_CHARS_BUDGET", "9000"))
 
 SMALLTALK_SET = {
     "안녕", "안녕하세요", "하이", "hi", "hello", "헬로", "테스트", "test",
@@ -43,6 +48,27 @@ class RAGPipeline:
             threshold=THRESHOLD_DISTANCE
         )
 
+    # ★ LLM 컨텍스트 초과 방지용 트리머(문자 기준)
+    def _trim_docs_for_llm(self, docs: List[Document]) -> List[str]:
+        clipped: List[str] = []
+        budget = MAX_CONTEXT_CHARS_BUDGET
+        for d in docs:
+            piece = (d.page_content or "")
+            if not piece:
+                continue
+            # 개별 청크 상한
+            piece = piece[:MAX_DOC_CHARS_FOR_LLM]
+            # 전체 예산 내로 컷
+            if len(piece) > budget:
+                piece = piece[:max(0, budget)]
+            if not piece:
+                break
+            clipped.append(piece)
+            budget -= len(piece)
+            if budget <= 0:
+                break
+        return clipped
+
     def generate_answer(self, question: str) -> str:
         # 0) 스몰토크/의미 약한 입력 차단
         if is_smalltalk(question):
@@ -57,7 +83,8 @@ class RAGPipeline:
 
         # 3) 문서가 있으면 RAG 수행
         docs = [doc for doc, _ in pairs]
-        messages = self.prompt_builder([d.page_content for d in docs], question)
+        contents = self._trim_docs_for_llm(docs)  # ★ 컨텍스트 가드
+        messages = self.prompt_builder(contents, question)
         return self.llm.chat(messages)
 
     def generate_answer_with_sources(self, question: str):
@@ -74,7 +101,8 @@ class RAGPipeline:
 
         # ===== LLM 호출 =====
         docs = [doc for doc, _ in pairs]
-        messages = self.prompt_builder([d.page_content for d in docs], question)
+        contents = self._trim_docs_for_llm(docs)  # ★ 컨텍스트 가드
+        messages = self.prompt_builder(contents, question)
         answer = self.llm.chat(messages)
 
         # ===== 출처 생성 (source_url 주입) =====
@@ -100,7 +128,7 @@ class RAGPipeline:
                     pass
 
             sources.append({
-                "text": doc.page_content[:500],
+                "text": (doc.page_content or "")[:500],
                 "score": float(score),
                 "confidence": md["confidence"],
                 "metadata": md,     # ← 여기 안에 source_url, title, page, gs_path 포함
