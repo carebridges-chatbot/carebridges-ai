@@ -7,8 +7,6 @@ class ChatRequest(BaseModel):
 
 class Source(BaseModel):
     text: str
-    score: Optional[float] = None         # 벡터 거리(작을수록 유사)
-    confidence: Optional[float] = None    # 0~1 확신도(클수록 유사)
     metadata: Optional[Dict[str, Any]] = None
 
 class ChatResponse(BaseModel):
