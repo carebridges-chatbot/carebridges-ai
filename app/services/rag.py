@@ -127,6 +127,10 @@ class RAGPipeline:
                     # 실패해도 다른 필드는 유지
                     pass
 
+            md.pop("title", None)
+            md.pop("gs_path", None)
+            md.pop("source", None)
+            
             sources.append({
                 "text": (doc.page_content or "")[:500],
                 "score": float(score),
