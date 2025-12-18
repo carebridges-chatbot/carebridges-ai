@@ -1,5 +1,5 @@
 # 🌉 CareBridges AI Core
-> **장기요양기관 종사자를 위한 법령/노무/고시 정보 전문 AI**
+> **AI specialized in legal/labor/notification information for long-term care facility workers**
 <br>
 
 ### 🎙️ [업그라운더 1기 돌봄다리] AI 레포지토리입니다.
