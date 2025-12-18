@@ -53,3 +53,15 @@ carebridges-ai/
 ├── main.py                 # 서비스 진입점
 ├── requirements.txt        # 의존성 목록
 └── appspec.yml             # AWS CodeDeploy 설정 파일
+📁 주요 Source code 설명경로설명app/services/rag.pyRAG 아키텍처의 핵심 로직 (검색 및 증강 생성 통합 제어)app/services/chatbot.py시스템 프롬프트 관리 및 대화 컨텍스트 처리app/api/endpoints/retriever.py입력된 쿼리에 대해 벡터 DB(FAISS)에서 관련 문서를 검색하는 모듈crawler/weekly_runner.py주기적으로 최신 복지 정보를 수집하여 데이터베이스를 최신화하는 파이프라인app/core/config.pyAPI 키 및 AWS 설정값 등 환경 변수 관리2. How to build and install1. AI 레포지토리 CloneBashgit clone [https://github.com/carebridges-chatbot/carebridges-ai.git](https://github.com/carebridges-chatbot/carebridges-ai.git)
+cd carebridges-ai
+2. 가상환경 구성 및 의존성 설치Bashpython -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+3. 환경 변수 설정 (.env)루트 디렉토리에 .env 파일을 생성하고 아래 형식을 참조하여 작성합니다.코드 스니펫OPENAI_API_KEY=your_key_here
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+# 기타 서비스 설정값들...
+3. How to test방법 1. FastAPI Swagger UI (추천)서버를 실행한 후 브라우저에서 인터랙티브하게 API를 테스트할 수 있습니다.Bashuvicorn main:app --reload
+URL: http://localhost:8000/docs 접속방법 2. Crawler 테스트데이터 수집 파이프라인이 정상 작동하는지 확인하려면 아래 명령어를 실행합니다.Bashpython crawler/weekly_runner.py
+4. 데이터베이스 및 RAG 구성🗃️ Vector DB: FAISS사용 목적: 방대한 복지 정책 및 돌봄 가이드라인 중 질문과 가장 관련 있는 문서 추출인덱스 위치: db/faiss_index프로세스:crawler/를 통해 데이터 수집app/db/vectorstore.py를 통해 임베딩 및 인덱싱질문 발생 시 유사도 기반 검색 후 LLM 전달5. Open Source UsedLangChain: LLM 체인 및 RAG 워크플로우 관리FastAPI: 비동기 기반 고성능 API 서버OpenAI SDK: GPT-4o 연동FAISS: 효율적인 벡터 검색 엔진✏️ SW 구조도(여기에 나중에 이미지 업로드 후 링크를 넣으세요!)
