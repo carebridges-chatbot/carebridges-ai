@@ -2,6 +2,145 @@
 > **AI specialized in legal/labor/notification information for long-term care facility workers**
 <br>
 
+### 🎙️ [Upgraunder 1st Cohort - CareBridges] AI Repository
+- This repository is a **RAG (Retrieval-Augmented Generation)** based LLM engine designed to provide senior care services and welfare information.
+- It generates accurate information based on reliable data (public data, care guidelines, etc.) and provides personalized care consultations.
+- Built with a high-performance API server based on **FastAPI**, **FAISS** vector search, and an automated deployment environment using **GitHub Actions + AWS CodeDeploy**.
+
+---
+## 🔧 Tech Stack
+### 📌 Language & Framework
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+
+### 📌 LLM & RAG
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-4B8BBE?style=for-the-badge&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-00599C?style=for-the-badge&logoColor=white)
+
+### 📌 DevOps & Deployment
+![AWS EC2](https://img.shields.io/badge/AWS_EC2-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![AWS CodeDeploy](https://img.shields.io/badge/AWS_CodeDeploy-6DB33F?style=for-the-badge&logo=amazonaws&logoColor=white)
+
+### 🔎 Technical Details
+- **Language:** Python 3.10+
+- **Framework:** FastAPI
+- **LLM Model:** OpenAI GPT-4o
+- **Vector DB:** FAISS (Facebook AI Similarity Search)
+- **Deployment:** CI/CD pipeline based on AWS EC2 + GitHub Actions & AWS CodeDeploy
+---
+
+# 1. Project Structure and Key Source Code Description
+
+📁 Project Structure
+```bash
+carebridges-ai/
+├── app/                    # FastAPI main service logic
+│   ├── api/                # Endpoints and routing
+│   │   └── endpoints/      # Core API logic (chat.py, retriever.py, etc.)
+│   ├── core/               # Configuration management (config.py, dependencies.py)
+│   ├── db/                 # Vector store management (vectorstore.py)
+│   ├── schemas/            # Pydantic models (Request/Response specifications)
+│   └── services/           # Business logic (chatbot.py, rag.py, openai_client.py)
+├── crawler/                # Data collection pipeline
+│   ├── notification.py     # Collection status notification module
+│   ├── step2_build_manifest.py
+│   ├── step3_download_convert.py
+│   └── weekly_runner.py    # Weekly automated collection runner
+├── data/                   # Initial data and FAQ repository
+├── scripts/                # Server operation scripts (start.sh, stop.sh, etc.)
+├── main.py                 # Service entry point
+├── requirements.txt        # Dependency list
+└── appspec.yml             # AWS CodeDeploy configuration file
+```
+
+📁 Key Source Code Description
+
+| Path | Description |
+| --- | --- |
+| **`main.py`** | Main entry point that runs the FastAPI application |
+| **`app/services/chatbot.py`** | Passes user questions to GPT and generates responses matching the CareBridges persona |
+| **`app/db/vectorstore.py`** | Embeds collected data and stores/loads it in FAISS vector DB (RAG knowledge base construction) |
+| **`app/services/rag.py`** | Core RAG logic that embeds query sentences, searches for similar context in FAISS, and passes it to LLM |
+| **`app/api/endpoints/chat.py`** | Receives questions via `/chat` route and returns answers as JSON after RAG process |
+| **`crawler/weekly_runner.py`** | Execution script that regularly crawls new care/welfare information weekly to update data |
+| **`app/core/config.py`** | Manages key environment variables such as OpenAI API key, AWS settings, FAISS index path |
+| **`data/`** | Folder for storing crawled raw data and preprocessed text files |
+
+---
+
+# 2. How to Build and Install
+
+### 1. Clone AI Repository
+```bash
+git clone https://github.com/carebridges-chatbot/carebridges-ai.git
+cd carebridges-ai  # Navigate to the project after cloning
+```
+
+### 2. Set Up Virtual Environment (Optional)
+```bash
+python -m venv venv
+source venv/bin/activate  # (For Windows: venv\Scripts\activate)
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Environment Variables (.env)
+Create a `.env` file in the project root directory and write environment variables in the following format:
+```bash
+# OpenAI API Key
+OPENAI_API_KEY=your_openai_api_key
+
+# AWS Configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+
+# Server Configuration
+APP_ENV=development
+PORT=8000
+```
+---
+
+# 3. How to Test
+The CareBridges AI server can be tested in two ways:
+1. HTTP request testing using FastAPI Swagger UI
+2. Interactive mode execution in terminal
+
+The interactive mode allows faster and more convenient testing.
+The server runs by default at `http://localhost:8000`.
+
+---
+
+# 4. Sample Data and Database Configuration
+📁 Sample Data Description
+- The `data/` folder contains reliable public data text files such as senior welfare benefits and care guidelines.
+- This data undergoes text chunking and embedding processing, vectorized so the AI can use it as a basis for answers.
+- If data is manually modified, it must go through step 5 (Optional) initialization to be reflected.
+
+---
+
+# 5. Open Source Used
+This project was developed based on the following open-source libraries:
+- **LangChain**
+  - Purpose: Building RAG (Retrieval-Augmented Generation) pipeline and managing LLM workflows
+- **OpenAI API**
+  - Purpose: High-performance natural language response generation and text embedding based on GPT-4o
+- **FastAPI**
+  - Purpose: High-performance REST API server implementation supporting asynchronous processing
+- **FAISS**
+  - Purpose: Efficient local vector storage and similarity search engine
+- **BeautifulSoup4**
+  - Purpose: Web data crawling for collecting latest welfare information
+---
+
+# 🌉 CareBridges AI Core
+> **AI specialized in legal/labor/notification information for long-term care facility workers**
+<br>
+
 ### 🎙️ [업그라운더 1기 돌봄다리] AI 레포지토리입니다.
 - 본 레포지토리는 시니어 케어 서비스 및 복지 정보를 제공하기 위해 고안된 **RAG(Retrieval-Augmented Generation)** 기반 LLM 엔진입니다.
 - 신뢰할 수 있는 데이터(공공 데이터, 돌봄 가이드라인 등)를 바탕으로 정확한 정보를 생성하며, 사용자 맞춤형 돌봄 상담을 제공합니다.
