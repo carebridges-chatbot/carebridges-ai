@@ -1,29 +1,29 @@
-# 🌉 CareBridges AI Core
+# CareBridges AI Core
 > **AI specialized in legal/labor/notification information for long-term care facility workers**
 <br>
 
-### 🎙️ [Upgraunder 1st Cohort - CareBridges] AI Repository
+### [Upgraunder 1st Cohort - CareBridges] AI Repository
 - This repository is a **RAG (Retrieval-Augmented Generation)** based LLM engine designed to provide senior care services and welfare information.
 - It generates accurate information based on reliable data (public data, care guidelines, etc.) and provides personalized care consultations.
 - Built with a high-performance API server based on **FastAPI**, **FAISS** vector search, and an automated deployment environment using **GitHub Actions + AWS CodeDeploy**.
 
 ---
-## 🔧 Tech Stack
-### 📌 Language & Framework
+## Tech Stack
+### Language & Framework
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
-### 📌 LLM & RAG
+### LLM & RAG
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-4B8BBE?style=for-the-badge&logoColor=white)
 ![FAISS](https://img.shields.io/badge/FAISS-00599C?style=for-the-badge&logoColor=white)
 
-### 📌 DevOps & Deployment
+### DevOps & Deployment
 ![AWS EC2](https://img.shields.io/badge/AWS_EC2-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![AWS CodeDeploy](https://img.shields.io/badge/AWS_CodeDeploy-6DB33F?style=for-the-badge&logo=amazonaws&logoColor=white)
 
-### 🔎 Technical Details
+### Technical Details
 - **Language:** Python 3.10+
 - **Framework:** FastAPI
 - **LLM Model:** OpenAI GPT-4o
@@ -33,7 +33,7 @@
 
 # 1. Project Structure and Key Source Code Description
 
-📁 Project Structure
+Project Structure
 ```bash
 carebridges-ai/
 ├── app/                    # FastAPI main service logic
@@ -55,7 +55,7 @@ carebridges-ai/
 └── appspec.yml             # AWS CodeDeploy configuration file
 ```
 
-📁 Key Source Code Description
+Key Source Code Description
 
 | Path | Description |
 | --- | --- |
@@ -116,7 +116,7 @@ The server runs by default at `http://localhost:8000`.
 ---
 
 # 4. Sample Data and Database Configuration
-📁 Sample Data Description
+Sample Data Description
 - The `data/` folder contains reliable public data text files such as senior welfare benefits and care guidelines.
 - This data undergoes text chunking and embedding processing, vectorized so the AI can use it as a basis for answers.
 - If data is manually modified, it must go through step 5 (Optional) initialization to be reflected.
@@ -137,27 +137,27 @@ This project was developed based on the following open-source libraries:
   - Purpose: Web data crawling for collecting latest welfare information
 ---
 
-# 🌉 CareBridges AI Core
+# CareBridges AI Core
 > **AI specialized in legal/labor/notification information for long-term care facility workers**
 <br>
 
-### 🎙️ [업그라운더 1기 돌봄다리] AI 레포지토리입니다.
+### [업그라운더 1기 돌봄다리] AI 레포지토리입니다.
 - 본 레포지토리는 시니어 케어 서비스 및 복지 정보를 제공하기 위해 고안된 **RAG(Retrieval-Augmented Generation)** 기반 LLM 엔진입니다.
 - 신뢰할 수 있는 데이터(공공 데이터, 돌봄 가이드라인 등)를 바탕으로 정확한 정보를 생성하며, 사용자 맞춤형 돌봄 상담을 제공합니다.
 - **FastAPI** 기반의 고성능 API 서버와 **FAISS** 벡터 검색, **GitHub Actions + AWS CodeDeploy** 기반의 자동 배포 환경을 구축하였습니다.
 
 ---
-## 🔧 기술 스택
-### 📌 Language & Framework
+## 기술 스택
+### Language & Framework
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
 
-### 📌 LLM & RAG
+### LLM & RAG
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
 ![LangChain](https://img.shields.io/badge/LangChain-4B8BBE?style=for-the-badge&logoColor=white)
 ![FAISS](https://img.shields.io/badge/FAISS-00599C?style=for-the-badge&logoColor=white)
 
-### 📌 DevOps & Deployment
+### DevOps & Deployment
 ![AWS EC2](https://img.shields.io/badge/AWS_EC2-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![AWS CodeDeploy](https://img.shields.io/badge/AWS_CodeDeploy-6DB33F?style=for-the-badge&logo=amazonaws&logoColor=white)
@@ -172,7 +172,7 @@ This project was developed based on the following open-source libraries:
 
 # 1. 프로젝트 구조 및 주요 Source code 설명
 
-📁 프로젝트 구조
+프로젝트 구조
 ```bash
 carebridges-ai/
 ├── app/                    # FastAPI 메인 서비스 로직
@@ -193,7 +193,7 @@ carebridges-ai/
 ├── requirements.txt        # 의존성 목록
 └── appspec.yml             # AWS CodeDeploy 설정 파일
 ```
-📁 주요 Source code 설명
+주요 Source code 설명
 
 | 경로 | 설명 |
 | --- | --- |
@@ -250,7 +250,7 @@ PORT=8000
 
 ---
 # 4. Sample Data 및 데이터베이스 구성
-📁 샘플 데이터 설명
+샘플 데이터 설명
 - `data/` 폴더에는 시니어 복지 혜택, 돌봄 가이드라인 등 신뢰할 수 있는 공공 데이터 텍스트 파일이 포함됩니다.
 - 이 데이터는 텍스트 청킹 과정을 거쳐 임베딩 처리되며, AI가 답변의 근거로 사용할 수 있도록 벡터화됩니다.
 - 수동으로 데이터를 수정할 경우 5. (선택) 초기화 단계를 거쳐야 반영됩니다.
