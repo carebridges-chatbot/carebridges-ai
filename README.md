@@ -162,7 +162,7 @@ This project was developed based on the following open-source libraries:
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![AWS CodeDeploy](https://img.shields.io/badge/AWS_CodeDeploy-6DB33F?style=for-the-badge&logo=amazonaws&logoColor=white)
 
-### 🔎 기술 디테일
+### 기술 디테일
 - **Language:** Python 3.10+
 - **Framework:** FastAPI
 - **LLM Model:** OpenAI GPT-4o
